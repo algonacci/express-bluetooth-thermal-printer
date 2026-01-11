@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Mini POS Full ESC/POS</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: 20px auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    select,
+    button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+    }
+
+    #log {
+      white-space: pre-wrap;
+      margin-top: 15px;
+      background: #eee;
+      padding: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Mini POS Full ESC/POS</h1>
+
+  <label for="printerSelect">Select Printer:</label>
+  <select id="printerSelect">
+    <option>Loading...</option>
+  </select>
+
+  <label for="baudRate" style="margin-top:10px; display:block">Baud Rate (Serial Only):</label>
+  <select id="baudRate">
+    <option value="9600" selected>9600 (Default)</option>
+    <option value="19200">19200</option>
+    <option value="38400">38400</option>
+    <option value="57600">57600</option>
+    <option value="115200">115200</option>
+  </select>
+
+  <div style="display:flex; gap:10px; margin-top:20px;">
+    <button id="printBtn">Print Struk (Full)</button>
+    <button id="testBtn" style="margin-top:0px; background:#ddd">Test Connection (Text Only)</button>
+  </div>
+
+  <pre id="log"></pre>
+
+  <script>
+    const AGENT_IP = window.location.origin;
+
+    // ... loadPrinters code ...
+
+    async function loadPrinters() {
+      try {
+        const res = await fetch(`${AGENT_IP}/printers`);
+        const data = await res.json();
+        const select = document.getElementById("printerSelect");
+        select.innerHTML = "";
+        if (data.printers.length === 0) {
+          select.innerHTML = "<option>No printers found</option>";
+          return;
+        }
+        data.printers.forEach((p) => {
+          const opt = document.createElement("option");
+          opt.value = p.id;
+          opt.textContent = p.name + " (" + p.id + ")";
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        document.getElementById("log").textContent =
+          "Failed to load printers: " + err;
+      }
+    }
+
+    document
+      .getElementById("printBtn")
+      .addEventListener("click", async () => {
+        const select = document.getElementById("printerSelect");
+        const printerId = select.value;
+        const baudRate = document.getElementById("baudRate").value;
+
+        try {
+          const res = await fetch(`${AGENT_IP}/print`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ printerId, baudRate }),
+          });
+
+          const data = await res.json();
+          document.getElementById("log").textContent = JSON.stringify(
+            data,
+            null,
+            2
+          );
+        } catch (err) {
+          document.getElementById("log").textContent = "Print failed: " + err;
+        }
+      });
+
+    document.getElementById("testBtn").addEventListener("click", async () => {
+      const select = document.getElementById("printerSelect");
+      const printerId = select.value;
+      const baudRate = document.getElementById("baudRate").value;
+
+      try {
+        const res = await fetch(`${AGENT_IP}/print`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ printerId, baudRate, simpleMode: true }),
+        });
+
+        const data = await res.json();
+        document.getElementById("log").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("log").textContent = "Test failed: " + err;
+      }
+    });
+
+    loadPrinters();
+  </script>
+</body>
+
+</html>

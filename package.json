@@ -1,0 +1,21 @@
+{
+  "name": "express-bluetooth-thermal-printer",
+  "version": "1.0.0",
+  "description": "sesuai namanya",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "escpos": "^3.0.0-alpha.6",
+    "escpos-usb": "^3.0.0-alpha.4",
+    "express": "^5.2.1",
+    "jimp": "^1.6.0",
+    "serialport": "^13.0.0"
+  }
+}
